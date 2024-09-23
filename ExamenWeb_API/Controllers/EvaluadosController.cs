@@ -68,7 +68,7 @@ namespace ExamenWeb_API.Controllers
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
                 };
 
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"].ToString() ?? ""));
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"] ?? ""));
                 var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
                 var token = new JwtSecurityToken(
@@ -104,7 +104,7 @@ namespace ExamenWeb_API.Controllers
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
                 };
 
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"].ToString() ?? ""));
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"] ?? ""));
                 var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
                 var token = new JwtSecurityToken(
@@ -124,11 +124,11 @@ namespace ExamenWeb_API.Controllers
         public async Task<ActionResult> CreateExamenEvaluado( int idExamen )
         {
             // Cast to ClaimsIdentity.
-            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            var identity = (ClaimsIdentity)HttpContext.User.Identity;
             // Gets list of claims.
             IEnumerable<Claim> claim = identity.Claims;
             // Gets name from claims. Generally it's an email address.
-            string? documento_Identidad = claim.FirstOrDefault(x => x.Type == "documento_Identidad").Value.ToString();
+            string? documento_Identidad = claim.First(x => x.Type == "documento_Identidad").Value.ToString();
 
             var evaluado = await _context.Evaluados.Include(ev => ev.Intentos).FirstOrDefaultAsync(e => e.numero_identificacion == documento_Identidad);
 
