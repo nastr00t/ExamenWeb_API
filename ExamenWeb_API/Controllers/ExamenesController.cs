@@ -19,12 +19,13 @@ namespace ExamenWeb_API.Controllers
         {
             _context = context;
         }
-        
+
         // GET: api/Examenes
-        [HttpGet("VerExamenes")]        
+        [HttpGet("VerExamenes")]
         public async Task<ActionResult<IEnumerable<Examenes>>> GetExamen()
         {
-            return await _context.Examenes.Where(e=> e.estado==true).ToListAsync();
+            var examenes = await _context.Examenes.Where(e => e.estado == true).ToListAsync();
+            return Ok(new{status= "success",examenes});
         }
 
         // GET: api/Examenes/   
@@ -39,7 +40,7 @@ namespace ExamenWeb_API.Controllers
                 return NotFound();
             }
 
-            return  examen;
+            return  Ok(new { status = "success", examen });
         }
 
         // POST: api/Examenes
@@ -51,7 +52,7 @@ namespace ExamenWeb_API.Controllers
             _context.Examenes.Add(examen);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetExamen", new { id = examen.id_examen }, examen);
+            return CreatedAtAction("GetExamen", new {status= "success", id = examen.id_examen }, examen);
 
         }
 
@@ -112,7 +113,7 @@ namespace ExamenWeb_API.Controllers
                 return NotFound();
             }
 
-            return Categoria;
+            return Ok(new { status = "success", Categoria }) ;
         }
 
         [HttpPost("IngresarPregunta")]
@@ -140,7 +141,7 @@ namespace ExamenWeb_API.Controllers
             {
                 return NotFound();
             }
-            return preguntas;
+            return Ok(new { status = "success", preguntas }); 
         }
 
         [HttpGet("GetPregunta/{id}")]
@@ -151,7 +152,7 @@ namespace ExamenWeb_API.Controllers
             {
                 return NotFound();
             }
-            return pregunta;
+            return Ok(new { status = "success", pregunta }); ;
         }
 
         [HttpPost("CargarPlantilla")]
