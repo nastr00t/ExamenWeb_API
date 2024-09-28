@@ -13,7 +13,7 @@ public partial class Certificados
 
     public bool estado { get; set; }
 
-    public virtual ICollection<Certificados_Categoria> Certificados_Categoria { get; set; } = new List<Certificados_Categoria>();
+    public virtual ICollection<Categorias_Examen> Categorias_Examen { get; set; } = new List<Categorias_Examen>();
 
     public virtual Evaluados? id_evaluadoNavigation { get; set; }
 }

@@ -14,25 +14,25 @@ namespace ExamenWeb_API.Controllers
     [Authorize]
     public class ExamenesController : ControllerBase
     {
-        private readonly Examenes_DBContext _context;
-        public ExamenesController(Examenes_DBContext context)
+        private readonly examendbContext _context;
+        public ExamenesController(examendbContext context)
         {
             _context = context;
         }
         
         // GET: api/Examenes
         [HttpGet("VerExamenes")]        
-        public async Task<ActionResult<IEnumerable<Examen>>> GetExamen()
+        public async Task<ActionResult<IEnumerable<Examenes>>> GetExamen()
         {
-            return await _context.Examen.Where(e=> e.estado==true).ToListAsync();
+            return await _context.Examenes.Where(e=> e.estado==true).ToListAsync();
         }
 
         // GET: api/Examenes/   
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Examen>> GetExamen(int id)
+        public async Task<ActionResult<Examenes>> GetExamen(int id)
         {
-            var examen = await _context.Examen.FindAsync(id);
+            var examen = await _context.Examenes.FindAsync(id);
 
             if (examen == null)
             {
@@ -46,9 +46,9 @@ namespace ExamenWeb_API.Controllers
       
         [HttpPost("IngresarExamen")]
         
-        public async Task<ActionResult<Examen>>PostExamen(Examen examen)
+        public async Task<ActionResult<Examenes>>PostExamen(Examenes examen)
         {
-            _context.Examen.Add(examen);
+            _context.Examenes.Add(examen);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetExamen", new { id = examen.id_examen }, examen);
@@ -58,7 +58,7 @@ namespace ExamenWeb_API.Controllers
         
         // PUT: api/Examenes/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutExamen(int  id, Examen examen)
+        public async Task<IActionResult> PutExamen(int  id, Examenes examen)
         {
             if (id != examen.id_examen)
             {
@@ -189,7 +189,7 @@ namespace ExamenWeb_API.Controllers
 
         private bool ExamenExists(int id)
         {
-            return _context.Examen.Any(e => e.id_examen == id);
+            return _context.Examenes.Any(e => e.id_examen == id);
         }
     }
 }

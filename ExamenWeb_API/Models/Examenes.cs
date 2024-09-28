@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ExamenWeb_API.Models;
 
-public partial class Examen
+public partial class Examenes
 {
     public int id_examen { get; set; }
 
@@ -17,15 +17,13 @@ public partial class Examen
 
     public bool estado { get; set; }
 
-    public int id_usuario_creador { get; set; }
+    public int? id_usuario { get; set; }
 
     public DateTime fecha_creacion { get; set; }
 
-    public virtual ICollection<Examen_Categorias> Examen_Categorias { get; set; } = new List<Examen_Categorias>();
+    public virtual ICollection<Categorias_Examen> Categorias_Examen { get; set; } = new List<Categorias_Examen>();
 
     public virtual ICollection<Intentos> Intentos { get; set; } = new List<Intentos>();
 
-    public virtual Usuarios id_usuario_creadorNavigation { get; set; } = null!;
-
-    public virtual ICollection<Preguntas> id_pregunta { get; set; } = new List<Preguntas>();
+    public virtual Usuarios? id_usuarioNavigation { get; set; }
 }

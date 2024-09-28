@@ -15,9 +15,7 @@ public partial class Respuestas_Intento
 
     public int? tiempo_respuesta { get; set; }
 
+    public virtual Respuestas? Respuestas { get; set; }
+
     public virtual Intentos? id_intentoNavigation { get; set; }
-
-    public virtual Preguntas? id_preguntaNavigation { get; set; }
-
-    public virtual Respuestas? id_respuestaNavigation { get; set; }
 }

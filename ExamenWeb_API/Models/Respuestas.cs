@@ -15,5 +15,5 @@ public partial class Respuestas
 
     public virtual ICollection<Respuestas_Intento> Respuestas_Intento { get; set; } = new List<Respuestas_Intento>();
 
-    public virtual Preguntas? id_preguntaNavigation { get; set; } = null!;
+    public virtual Preguntas id_preguntaNavigation { get; set; } = null!;
 }

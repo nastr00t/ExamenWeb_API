@@ -19,5 +19,5 @@ public partial class Intentos
 
     public virtual Evaluados? id_evaluadoNavigation { get; set; }
 
-    public virtual Examen? id_examenNavigation { get; set; }
+    public virtual Examenes? id_examenNavigation { get; set; }
 }

@@ -25,7 +25,7 @@ public partial class Usuarios
 
     public virtual ICollection<Categorias> Categorias { get; set; } = new List<Categorias>();
 
-    public virtual ICollection<Examen> Examen { get; set; } = new List<Examen>();
+    public virtual ICollection<Examenes> Examenes { get; set; } = new List<Examenes>();
 
     public virtual ICollection<Preguntas> Preguntas { get; set; } = new List<Preguntas>();
 }

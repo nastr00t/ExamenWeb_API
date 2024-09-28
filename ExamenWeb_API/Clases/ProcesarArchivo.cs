@@ -6,10 +6,10 @@ namespace ExamenWeb_API.Clases
 {
     public class ProcesarArchivo
     {
-        private readonly Examenes_DBContext db;
+        private readonly examendbContext db;
  
 
-        public ProcesarArchivo(Examenes_DBContext context)
+        public ProcesarArchivo(examendbContext context)
         {
             db = context;
         }
@@ -38,7 +38,7 @@ namespace ExamenWeb_API.Clases
                                 string? v = worksheet.Cells[row, 2].Value.ToString();
                                 if (v != null)
                                 {
-                                    Categorias cat = new Categorias() { nombre = v };
+                                    Categorias cat = new Categorias() { nombre = v, id_usuario = user };
                                     db.Categorias.Add(cat);
                                     await db.SaveChangesAsync();
                                 }
@@ -73,7 +73,7 @@ namespace ExamenWeb_API.Clases
                             int.TryParse(worksheet.Cells[row, 4].Value.ToString(), out int codigoExamen);
                             if (v != null)
                             {
-                                Preguntas pregunta  = new Preguntas() {id_pregunta = codigoPregunta,id_categoria = codigoCategoria, texto_pregunta= v, id_usuario_creador =user};
+                                Preguntas pregunta  = new Preguntas() {id_pregunta = codigoPregunta,id_categoria = codigoCategoria, texto_pregunta= v, id_usuario=user};
                                 preguntasList.Add(pregunta);
                                 examen = codigoExamen; 
                             }
@@ -133,7 +133,7 @@ namespace ExamenWeb_API.Clases
                     var catExamen = preguntasList.GroupBy(c => c.id_categoria);
                     foreach (var cat in catExamen) 
                     {
-                        db.Examen_Categorias.Add(new Examen_Categorias() { id_categoria = Convert.ToInt32(cat.Key), id_examen = examen });
+                        db.Categorias_Examen.Add(new Categorias_Examen() { id_categoria = Convert.ToInt32(cat.Key), id_examen = examen });
                     };
                     await db.SaveChangesAsync();
                 }

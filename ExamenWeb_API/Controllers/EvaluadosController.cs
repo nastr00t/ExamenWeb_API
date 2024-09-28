@@ -1,6 +1,7 @@
 ﻿using ExamenWeb_API.Data;
 using ExamenWeb_API.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -10,15 +11,16 @@ using System.Text;
 
 namespace ExamenWeb_API.Controllers
 {
+    [EnableCors()]
     [Route("api/[controller]")]
     [ApiController]
     public class EvaluadosController : ControllerBase
     {
         
-        private readonly Examenes_DBContext _context;
+        private readonly examendbContext _context;
         private IConfiguration _config;
 
-        public EvaluadosController(Examenes_DBContext context, IConfiguration config)
+        public EvaluadosController(examendbContext context, IConfiguration config)
         {
             _config = config;
             _context = context;
@@ -124,7 +126,7 @@ namespace ExamenWeb_API.Controllers
         public async Task<ActionResult> CreateExamenEvaluado( int idExamen )
         {
             // Cast to ClaimsIdentity.
-            var identity = (ClaimsIdentity)HttpContext.User.Identity;
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
             // Gets list of claims.
             IEnumerable<Claim> claim = identity.Claims;
             // Gets name from claims. Generally it's an email address.
@@ -135,7 +137,7 @@ namespace ExamenWeb_API.Controllers
             if (evaluado == null) {
                 return BadRequest(new { status = "failed", message = "Evaluado no activo" });
             }
-            var examen = await _context.Examen.Include(e=>e.Examen_Categorias).FirstOrDefaultAsync(e=> e.id_examen == idExamen);
+            var examen = await _context.Examenes.Include(e=>e.Categorias_Examen).FirstOrDefaultAsync(e=> e.id_examen == idExamen);
             if (examen == null) {
                 return BadRequest(new { status = "failed", message = "Exámen no válido" });
             }
@@ -143,9 +145,9 @@ namespace ExamenWeb_API.Controllers
             int preguntas = examen.cantidad_preguntas;
             Intentos intento = new Intentos() { id_examen = idExamen, id_evaluado = evaluado.id_evaluado,fecha_intento = DateTime.Now };
 
-            foreach (Examen_Categorias categoria in examen.Examen_Categorias)
+            foreach (Categorias_Examen categoria in examen.Categorias_Examen)
             {
-                if (int.TryParse((Convert.ToDouble(preguntas) * (categoria.peso_minimo / 100)).ToString(), out int preguntasCAT))
+                if (int.TryParse((Convert.ToDouble(preguntas) * (categoria.porcentaje_examen / 100)).ToString(), out int preguntasCAT))
                 {
                     List<Preguntas> preguntasCategoria = _context.Preguntas.Where(p=> p.id_categoria == categoria.id_categoria).OrderBy(r => Guid.NewGuid()).Take(preguntasCAT).ToList();
                     foreach (var item in preguntasCategoria)

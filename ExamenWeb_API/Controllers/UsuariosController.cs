@@ -1,7 +1,5 @@
 ﻿using ExamenWeb_API.Data;
 using ExamenWeb_API.Models;
-using ExamenWeb_API.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -15,10 +13,10 @@ namespace ExamenWeb_API.Controllers
     [ApiController]
     public class UsuariosController : ControllerBase
     {
-        private readonly Examenes_DBContext db;
+        private readonly examendbContext db;
         private IConfiguration _config ;
 
-        public UsuariosController(Examenes_DBContext context, IConfiguration config)
+        public UsuariosController(examendbContext context, IConfiguration config)
         {
             _config = config;
             db = context;
