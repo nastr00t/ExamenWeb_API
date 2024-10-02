@@ -31,7 +31,8 @@ namespace ExamenWeb_API.Controllers
         [Authorize]
         public async Task<ActionResult<IEnumerable<Evaluados>>> List()
         {
-            return await _context.Evaluados.ToListAsync();
+            List<Evaluados> evaluados = await _context.Evaluados.ToListAsync();
+            return Ok(new { status = "success", message = "Examen Registrado", evaluados });
         }
 
         // GET: api/Evaluados/5
@@ -45,11 +46,8 @@ namespace ExamenWeb_API.Controllers
             {
                 return NotFound();
             }
-
-            return evaluado;
+            return Ok(new { status = "success", evaluado });
         }
-
-        
 
         [HttpPost("Register")]
         public async Task<ActionResult<Evaluados>> Register([FromBody] Evaluados evaluado)
@@ -119,9 +117,7 @@ namespace ExamenWeb_API.Controllers
 
             }
         }
-
        
-
         [HttpPost("CreateExamenEvaluado")]
         public async Task<ActionResult> CreateExamenEvaluado( int idExamen )
         {
@@ -132,7 +128,7 @@ namespace ExamenWeb_API.Controllers
             // Gets name from claims. Generally it's an email address.
             string? documento_Identidad = claim.First(x => x.Type == "documento_Identidad").Value.ToString();
 
-            var evaluado = await _context.Evaluados.Include(ev => ev.Intentos).FirstOrDefaultAsync(e => e.numero_identificacion == documento_Identidad);
+            var evaluado = await _context.Evaluados.Include(ev => ev.Intentos).ThenInclude(i=>i.Respuestas_Intento).FirstOrDefaultAsync(e => e.numero_identificacion == documento_Identidad);
 
             if (evaluado == null) {
                 return BadRequest(new { status = "failed", message = "Evaluado no activo" });
@@ -141,13 +137,16 @@ namespace ExamenWeb_API.Controllers
             if (examen == null) {
                 return BadRequest(new { status = "failed", message = "Exámen no válido" });
             }
-
+            if (_context.Intentos.Any(i => i.id_evaluado == evaluado.id_evaluado && i.id_examen == idExamen && i.calificacion==0))
+            {
+                return Ok(new { status = "success", message = "Examen Registrado", preguntas = evaluado.Intentos });
+            }
             int preguntas = examen.cantidad_preguntas;
-            Intentos intento = new Intentos() { id_examen = idExamen, id_evaluado = evaluado.id_evaluado,fecha_intento = DateTime.Now };
+            Intentos intento = new Intentos() { id_examen = idExamen, id_evaluado = evaluado.id_evaluado,fecha_intento = DateTime.Now, calificacion=0 };
 
             foreach (Categorias_Examen categoria in examen.Categorias_Examen)
             {
-                if (int.TryParse((Convert.ToDouble(preguntas) * (categoria.porcentaje_examen / 100)).ToString(), out int preguntasCAT))
+                if (int.TryParse(categoria.cantidad_preguntas.ToString(), out int preguntasCAT))
                 {
                     List<Preguntas> preguntasCategoria = _context.Preguntas.Where(p=> p.id_categoria == categoria.id_categoria).OrderBy(r => Guid.NewGuid()).Take(preguntasCAT).ToList();
                     foreach (var item in preguntasCategoria)
@@ -157,13 +156,51 @@ namespace ExamenWeb_API.Controllers
                 }
             }
             evaluado.Intentos.Add(intento);
-
             _context.Entry(evaluado).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
             return Ok(new { status = "success", message = "Examen Registrado" ,preguntas = evaluado.Intentos});
             
         }
+
+
+        [HttpPost("IngresarRespuestaPregunta")]
+        public async Task<ActionResult> IngresarRespuestaPregunta([FromBody] Respuestas_Intento respuesta )
+        {
+            // Cast to ClaimsIdentity.
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            // Gets list of claims.
+            IEnumerable<Claim> claim = identity.Claims;
+            // Gets name from claims. Generally it's an email address.
+            string? documento_Identidad = claim.First(x => x.Type == "documento_Identidad").Value.ToString();
+
+            var evaluado = await _context.Evaluados.Include(ev => ev.Intentos).ThenInclude(i => i.Respuestas_Intento).FirstOrDefaultAsync(e => e.numero_identificacion == documento_Identidad);
+
+            if (evaluado == null)
+            {
+                return BadRequest(new { status = "failed", message = "Evaluado no activo" });
+            }
+            Respuestas res = _context.Respuestas.First(r => r.id_respuesta == respuesta.id_respuesta);
+            evaluado.Intentos.First(i => i.calificacion == 0).Respuestas_Intento.First(r => r.id_pregunta == respuesta.id_pregunta).id_respuesta = respuesta.id_respuesta;
+            evaluado.Intentos.First(i => i.calificacion == 0).Respuestas_Intento.First(r => r.id_pregunta == respuesta.id_pregunta).tiempo_respuesta = res.es_correcta?1:0;
+           
+            if (evaluado.Intentos.First(i => i.calificacion == 0).Respuestas_Intento.Count(r => r.id_respuesta == null) == 0)
+            { 
+                List<Respuestas> respuestas =_context.Respuestas.ToList();
+                foreach (Respuestas respu in respuestas)
+                {
+                    if (evaluado.Intentos.First(i => i.calificacion == 0).Respuestas_Intento.Any(r => r.id_respuesta == respu.id_respuesta))
+                        evaluado.Intentos.First(i => i.calificacion == 0).Respuestas_Intento.First(r => r.id_pregunta == respu.id_pregunta).tiempo_respuesta = respu.es_correcta ? 1 : 0;
+                }
+                evaluado.Intentos.First(i => i.calificacion == 0).calificacion = evaluado.Intentos.First(i => i.calificacion == 0).Respuestas_Intento.Sum(c=> c.tiempo_respuesta);
+            }
+            _context.Entry(evaluado).State = EntityState.Modified;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { status = "success", message = "Respuesta registrado", preguntas = evaluado.Intentos });
+        }
+
 
 
         private bool EvaluadoExists(int id)

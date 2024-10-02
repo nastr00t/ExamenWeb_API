@@ -97,16 +97,15 @@ namespace ExamenWeb_API.Controllers
             {
                 _context.Categorias.Add(categoria);
                 await _context.SaveChangesAsync();
-
-                return CreatedAtAction("GetCategorias", new { id = categoria.id_categoria }, categoria);
+                return Ok(new { status = "success", id = categoria.id_categoria, categoria });
             }
             return BadRequest();
         }
 
         [HttpGet("GetCategorias")]
-        public async Task<ActionResult<Categorias>> GetCategorias(int id)
+        public async Task<ActionResult<Categorias>> GetCategorias()
         {
-            var Categoria = await _context.Categorias.FindAsync(id);
+            var Categoria = await _context.Categorias.ToListAsync();
 
             if (Categoria == null)
             {
@@ -152,6 +151,29 @@ namespace ExamenWeb_API.Controllers
             {
                 return NotFound();
             }
+            return Ok(new { status = "success", pregunta }); ;
+        }
+
+
+        [HttpPut("EditarPregunta/{id}")]
+        public async Task<ActionResult<Preguntas>> EditarPregunta([FromBody]_Preguntas preguntaEdit, int id)
+        {
+            var pregunta = await _context.Preguntas.Include(r => r.Respuestas).FirstAsync(p => p.id_pregunta == id);
+            if (pregunta == null)
+            {
+                return NotFound();
+            }
+            pregunta.texto_pregunta = preguntaEdit.texto_pregunta;
+            foreach (Respuestas respuesta in pregunta.Respuestas)
+            {
+                _Respuestas res = preguntaEdit.Respuestas.First(r => r.id_respuesta == respuesta.id_respuesta);
+                respuesta.texto_respuesta = respuesta.texto_respuesta;
+                respuesta.es_correcta = respuesta.es_correcta;
+                
+            }
+            _context.Entry(pregunta).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
             return Ok(new { status = "success", pregunta }); ;
         }
 

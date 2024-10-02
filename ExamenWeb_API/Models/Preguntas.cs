@@ -21,3 +21,19 @@ public partial class Preguntas
 
     public virtual Usuarios id_usuarioNavigation { get; set; } = null!;
 }
+
+public partial class _Preguntas
+{
+    public int id_pregunta { get; set; }
+
+    public int id_categoria { get; set; }
+
+    public string texto_pregunta { get; set; } = null!;
+
+    public int id_usuario { get; set; }
+
+    public DateTime fecha_creacion { get; set; }
+
+    public virtual List<_Respuestas> Respuestas { get; set; } = new List<_Respuestas>();
+
+}
