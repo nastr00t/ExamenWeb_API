@@ -133,7 +133,7 @@ namespace ExamenWeb_API.Clases
                     var catExamen = preguntasList.GroupBy(c => c.id_categoria);
                     foreach (var cat in catExamen) 
                     {
-                        db.Categorias_Examen.Add(new Categorias_Examen() { id_categoria = Convert.ToInt32(cat.Key), id_examen = examen });
+                        db.Categorias_Examen.Add(new Categorias_Examen() { id_categoria = Convert.ToInt32(cat.Key), id_examen = examen,cantidad_preguntas=10,porcentaje_examen=25 });
                     };
                     await db.SaveChangesAsync();
                 }
